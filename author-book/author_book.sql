@@ -86,7 +86,14 @@ INSERT INTO Author_Book (author_id, book_id) VALUES
 (8, 22),
 (9, 23),
 (9, 24),
-(10, 25);
+(10, 25),
+(1, 3),
+(2, 6),
+(3, 8),
+(4, 1),
+(5, 7),
+(6, 12),
+(7, 10);
 
 -- Verify Authors table
 SELECT * FROM Authors;
@@ -97,6 +104,53 @@ SELECT * FROM Books;
 -- Verify Author_Book table
 SELECT * FROM Author_Book;
 
+-- 1. Find the total number of books written by each author. (Display author_id and count)
+SELECT author_id, COUNT(book_id)
+FROM Author_Book
+GROUP BY author_id;
+
+-- 1. Find the total number of books written by each author. (Display author_name and count)
+SELECT a.name, COUNT(ab.book_id)
+FROM Authors a
+INNER JOIN Author_Book ab
+ON a.author_id = ab.author_id
+GROUP BY a.author_id;
+
+-- 2. List all authors who have written more than three books.
+SELECT a.name
+FROM Authors a
+INNER JOIN Author_Book ab
+ON a.author_id = ab.author_id
+GROUP BY a.author_id
+HAVING COUNT(ab.book_id) > 3;
+
+-- 3. Find all books that have multiple authors.
+SELECT b.title
+FROM Books b
+INNER JOIN Author_Book ab
+ON b.book_id = ab.book_id
+GROUP BY ab.book_id
+HAVING COUNT(ab.author_id) > 1;
+
+-- 4. List all authors who have collaborated with another author on a book.
+SELECT DISTINCT a.name
+FROM Authors a
+INNER JOIN Author_Book ab1
+ON a.author_id = ab1.author_id
+INNER JOIN Author_Book ab2
+ON ab1.book_id = ab2.book_id
+AND ab1.author_id <> ab2.author_id;
+
+-- 5. Find the most prolific author (the author who has written the most books).
+SELECT a.name
+FROM Authors a
+INNER JOIN Author_Book ab
+ON a.author_id = ab.author_id
+GROUP BY ab.author_id
+ORDER BY COUNT(ab.book_id) DESC
+LIMIT 1;
+
+-- Interview Question
 -- Get Author Name of all Book Titles Ordered By Title Names
 SELECT title, name
 FROM Books b
