@@ -30,7 +30,8 @@ INSERT INTO Authors (author_id, name) VALUES
 (7, 'Arthur C. Clarke'),
 (8, 'Philip K. Dick'),
 (9, 'Frank Herbert'),
-(10, 'H.G. Wells');
+(10, 'H.G. Wells'),
+(11, 'Jeff Keller');
 
 -- Insert dummy values into the Books table
 INSERT INTO Books (book_id, title) VALUES
@@ -58,7 +59,8 @@ INSERT INTO Books (book_id, title) VALUES
 (22, 'Stranger in a Strange Land'),
 (23, 'Fahrenheit 451'),
 (24, 'Brave New World'),
-(25, '1984');
+(25, '1984'),
+(26, 'Atomic Habits');
 
 -- Insert dummy values into the Author_Book table
 INSERT INTO Author_Book (author_id, book_id) VALUES
@@ -150,7 +152,105 @@ GROUP BY ab.author_id
 ORDER BY COUNT(ab.book_id) DESC
 LIMIT 1;
 
--- Interview Question
+-- 6. List the titles of books written by 'J.K. Rowling'.
+SELECT b.title
+FROM Books b
+INNER JOIN Author_Book ab
+ON b.book_id = ab.book_id
+INNER JOIN Authors a
+ON ab.author_id = a.author_id
+WHERE a.name = 'J.K. Rowling';
+
+-- 7. Find all authors who have written a book in the 'Harry Potter' series.
+SELECT a.name
+FROM Authors a
+INNER JOIN Author_Book ab
+ON a.author_id = ab.author_id
+INNER JOIN Books b
+ON ab.book_id = b.book_id
+WHERE b.title LIKE 'Harry Potter%';
+
+-- 8. List all books and their authors.
+SELECT b.title, a.name
+FROM Books b
+INNER JOIN Author_Book ab
+ON b.book_id = ab.book_id
+INNER JOIN Authors a
+ON ab.author_id = a.author_id;
+
+-- 10. List all books that do not have an author in the database.
+SELECT b.title
+FROM Books b
+LEFT JOIN Author_Book ab
+ON b.book_id = ab.book_id
+WHERE ab.author_id IS NULL;
+
+-- 11. Find the number of unique authors who have written at least one book.
+SELECT COUNT(DISTINCT author_id)
+FROM Author_Book;
+
+-- 12. List all authors who have never written a book.
+SELECT a.name
+FROM Authors a
+LEFT JOIN Author_Book ab
+ON a.author_id = ab.author_id
+WHERE ab.author_id IS NULL;
+
+-- 13. Find all authors who have written exactly two books.
+SELECT a.name
+FROM Authors a
+INNER JOIN Author_Book ab
+ON a.author_id = ab.author_id
+GROUP BY a.author_id
+HAVING COUNT(ab.book_id) = 2;
+
+-- 15. Find the number of books written by each author, including those with no books.
+SELECT a.name, COUNT(ab.book_id) as book_count
+FROM Authors a
+LEFT JOIN Author_Book ab
+ON a.author_id = ab.author_id
+GROUP BY a.author_id;
+
+-- 16. List all authors and the titles of books they have written, even if they have written no books.
+SELECT a.name, b.title
+FROM Authors a
+LEFT JOIN Author_Book ab
+ON a.author_id = ab.author_id
+LEFT JOIN Books b
+ON ab.book_id = b.book_id;
+
+-- 17. Find all authors who have written a book with 'World' in the title.
+SELECT a.name
+FROM Authors a
+INNER JOIN Author_Book ab
+ON a.author_id = ab.author_id
+INNER JOIN Books b
+ON ab.book_id = b.book_id
+WHERE b.title LIKE '%World%';
+
+-- 18. List all books written by multiple authors, and the names of those authors. (Partially correct answer)
+SELECT b.title, a.name
+FROM Books b
+INNER JOIN Author_Book ab
+ON b.book_id = ab.book_id
+INNER JOIN Authors a
+ON ab.author_id = a.author_id
+GROUP BY b.book_id
+HAVING COUNT(ab.author_id) > 1;
+
+-- 19. Find all authors who have written more books than 'Stephen King'.
+SELECT a.name
+FROM Authors a
+JOIN Author_Book ab ON a.author_id = ab.author_id
+GROUP BY a.author_id
+HAVING COUNT(ab.book_id) > (
+    SELECT COUNT(*)
+    FROM Author_Book ab2
+    JOIN Authors a2 ON ab2.author_id = a2.author_id
+    WHERE a2.name = 'Stephen King'
+);
+
+-- Interview Question --
 -- Get Author Name of all Book Titles Ordered By Title Names
 SELECT title, name
 FROM Books b
@@ -168,3 +268,28 @@ ON b.book_id = ab.book_id
 INNER JOIN Authors a
 ON ab.author_id = a.author_id
 GROUP BY name;
+
+-- Bonus Section --
+-- Find all authors who have written a book with another author.
+SELECT DISTINCT a1.name
+FROM Authors a1
+INNER JOIN Author_Book ab1
+ON a1.author_id = ab1.author_id
+INNER JOIN Author_Book ab2
+ON ab1.book_id = ab2.book_id
+AND ab1.author_id <> ab2.author_id;
+
+-- List all authors who have written more books than the average number of books written by all authors.
+SELECT a.name
+FROM Authors a
+INNER JOIN Author_Book ab
+ON a.author_id = ab.author_id
+GROUP BY a.author_id
+HAVING COUNT(ab.book_id) > (
+    SELECT AVG(book_count)
+    FROM (
+        SELECT COUNT(book_id) as book_count
+        FROM Author_Book
+        GROUP BY author_id
+    ) AS subquery
+);
