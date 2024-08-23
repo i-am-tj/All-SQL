@@ -14,7 +14,7 @@
 14. List the titles of books written by authors who have written both science fiction and fantasy.
 15. Find the number of books written by each author, including those with no books.
 16. List all authors and the titles of books they have written, even if they have written no books.
-17. Find all authors who have written a book with 'King' in the title.
+17. Find all authors who have written a book with 'World' in the title.
 18. List all books written by multiple authors, and the names of those authors.
 19. Find all authors who have written more books than 'Stephen King'.
 20. List all books written before 2000 and their authors.
